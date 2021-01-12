@@ -1,31 +1,32 @@
 import base64
 
+import csv
+import ipywidgets as widgets
+import io
+import numpy as np
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import ppscore as pps
 import pandas as pd
 import plotly.express as px
+import streamlit as st
+import requests
+import sklearn
+import seaborn as sns
+import urllib
+
 from matplotlib import cm
 from sklearn import preprocessing, neighbors
 from sklearn.model_selection import train_test_split
-import ipywidgets as widgets
 from IPython.display import display
-import streamlit as st
-import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
-import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import seaborn as sns
-import plotly.graph_objects as go
-import ppscore as pps
 from PIL import Image
 from urllib.request import urlopen
-import io
-import requests
 from io import BytesIO
 from io import StringIO
-#import cStringIO
-import urllib
-import csv
 from sklearn.model_selection import GridSearchCV
 
 
@@ -34,9 +35,9 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
 
-file2 = ('https://raw.githubusercontent.com/Bubami/ISCM/main/FinaleExporte.csv')
+file2 = ('https://raw.githubusercontent.com/Bubami/ISCM_images/main/FinaleExporte.csv')
 file1 = "C:/Users/micha/Documents/Jupiter/ISCM/Erste Versüche/FinaleExporte.csv"
-df = pd.read_csv(file2, engine ='python', error_bad_lines=False, sep='\;')
+df = pd.read_csv(file2, engine ='python', error_bad_lines=True, sep='\;')
 df_all = df
 
 #df = df.drop(df.columns[0], axis=1)
