@@ -37,7 +37,7 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 file2 = ('https://raw.githubusercontent.com/Bubami/ISCM_images/main/FinaleExporte.csv')
 file1 = "C:/Users/micha/Documents/Jupiter/ISCM/Erste Versüche/FinaleExporte.csv"
-df = pd.read_csv(file2, engine ='python', error_bad_lines=True, sep='\;')
+df = pd.read_csv(file2, engine ='python', error_bad_lines=True, sep='[,;]')
 df_all = df
 
 #df = df.drop(df.columns[0], axis=1)
