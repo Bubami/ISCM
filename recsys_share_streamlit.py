@@ -32,21 +32,15 @@ from sklearn.model_selection import GridSearchCV
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
-#@st.cache
-#def get_data():
-#    url = "https://raw.githubusercontent.com/Bubami/ISCM/main/FinaleExporte2.csv"
- #   return pd.read_csv(url, sep=';')
 
 
-
-#df = get_data()
 file2 = ('https://raw.githubusercontent.com/Bubami/ISCM/main/FinaleExporte.csv')
-#file1 = "C:/Users/micha/Documents/Jupiter/ISCM/Erste Versüche/FinaleExporte.csv"
+file1 = "C:/Users/micha/Documents/Jupiter/ISCM/Erste Versüche/FinaleExporte.csv"
 df = pd.read_csv(file2, engine ='python', error_bad_lines=False, sep='\;')
 df_all = df
 
 #df = df.drop(df.columns[0], axis=1)
-df = df.drop("Bezeichnung", axis=1)
+df = df.drop("Funktion", axis=1)
 df = df.drop("Quelle", axis=1)
 df = df.drop("Anbieter", axis=1)
 df = df.drop("Reifegrad", axis=1)
@@ -179,7 +173,6 @@ def unique_sorted_values_plus_ALL(array):
 #Startseite
 def page_third():
     markdown_schmal()
-    st.write(df_all)
     st.title("Empfehlungsdienst zum Einsatz von 4.0 Technologien in der Suppply Chain")
     st.write("Diese Website soll die deskriptiven und präskriptiven Analysen zum SCM 4.0 Datensatz zugänglich machen. Wenn Sie eine Anleitung wünschen, wählen Sie im untenstehenden Dialo Ja aus. Anschliessend finden Sie einige Informationen zum Projekt im Rahmen der Bachelorarbeit.")
     anleitung_ja = st.radio("Wollen Sie die Anleitung für die Benutzung der Website anzeigen?",("Nein", "Ja"))
@@ -188,7 +181,7 @@ def page_third():
     st.write(""" 
     #
     #
-    Im Rahmen eines abgeschlossenen Projektes am Institut für Supply Chain Management der Universität St. Gallen ist eine Datenbank erstellt worden, die Use Cases zu 4.0 Technologien entlang der Supply Chain enthält. Diese Datenbank wurde aufbereitet und ist die Grundlage für die deskriptiven und präskriptiven Analysen.
+    Aufbauend auf einem abgeschlossenen Projekt am Institut für Supply Chain Management der Universität St. Gallen ist eine Datenbank ausgewertet worden, die Use Cases zu 4.0 Technologien entlang der Supply Chain enthält. Diese Datenbank wurde aufbereitet und ist die Grundlage für die deskriptiven und präskriptiven Analysen.
     Um den Datensatz und das gesamte Projekt besser zu verstehen, macht es Sinn sich zu Beginn mit den deskriptiven Analysen auseinander zu setzen. Anschliessend kann man auf der Seite der präskriptiven Analysen eine Problemstellung eingeben und erhält eine Technologie vorgeschlagen. 
     Will man dann mehr zu den Use Cases dieser Technologie wissen, kann man zurück auf die Seite der deskriptiven Analysen und dort die Beispiele herausfilten, die diese Technologie enthalten. 
     #
@@ -427,9 +420,7 @@ def page_second():
     value = st.selectbox("Wählen sie den gewünschten Algorithmus", options, format_func=lambda x: display[x])
 
     #Anzeige der Erklärung zu den Algorithmen
-    Alg_Erklaerung = st.radio("Zusatzinformationen zu den Algorithmen anzeigen?",
-                              ("Nein", "Ja"))
-    if Alg_Erklaerung == "Ja":
+    if st.checkbox("Zusatzinformationen zu den Algorithmen anzeigen"):
         algorithmen_info()
 
 
@@ -822,16 +813,20 @@ def page_second():
 def anleitung():
     st.info("""
     ### Startseite (Allgemeine Informationen, Anleitung)
-     * Mit der Auswahlleiste links, kann zwischen deskriptiv und präskriptiv gewählt werden. Ist keine Leiste sichtbar muss oben links auf das Pfeilsymbol gedrückt werden   
+     * Mit der Auswahlleiste links, kann zwischen deskriptiv und präskriptiv gewählt werden. Ist keine Leiste sichtbar muss oben links auf das Pfeilsymbol gedrückt werden.
     ### Deskriptiv (Datensatz, Numerische Informationen, Deskriptive Analysen)
-     * Auf der Seite für die deskriptiven Analysen, ist der Datensatz 1:1 und die Eckdaten dazu aufgelistet. 
-     * Man hat die Möglichkeit einzelne Parameter zu verändern um den Datensatz gefiltert anzuschauen. Zusätzliche Informationen zu  den Attributen sind bei den präskriptiven Analysen verfügbar.
-     * Die Daten werden mit visuellen Analysen dargestellt.
+     * Auf der Seite für die deskriptiven Analysen, ist der Datensatz 1:1 abgebildet und die Eckdaten dazu aufgelistet. 
+     * Man hat die Möglichkeit die Daten nach einzelnen Parametern zu filtern um den Datensatz gefilterten anzuschauen. Bis zu drei Filterstufen sind möglich.
+     * Gewünschte Beispiele können mit Beschreibung und Quelle ausgegeben werden
+     * Die gefilterten Daten können weiter unten nochmals sortiert in einem Kuchendiagramm dargestellt werden, oder es kann ein Predictive-Power-Score Diagramm gezeichnet werden.
+     
        
     ### Präskriptiv (Eingabe der Problemstellung, Vorhersage, Bewertung der Vorhersage)
      * Auf der Seite für die präskriptiven Analyen ist eine Eingabe der Problemparater eingerichtet.
      * Am Ende wird eine Technologie, sowie passende Schlüsseltechnologien vorgeschlagen.
      * Zusätzliche Informationen können falls vorhanden mit einem Button ein-, bzw. ausgeblendet werden.
+     * Im untersten Teil kann die Empfehlung bewertet werden.
+     * Die .csv Datei mit Ihrer Bewertung soll ans ISCM-HSG gesendet werden.
 
     """)
 def maturity_info():
@@ -961,6 +956,7 @@ def up_info():
     * Deliver13-15 = Receive and Verify Product by Costumer; Install Product; Invoice
     #### Return
     * Return1-2 = Identify Product Condition; Disposition Product
+    * Return3-4 = Request Product Return Authorization, Schedule Product Shipment
     * Return5-6 = Return Product; Receive Product (includes verify)
     #### Enable
     * Enable1-2 = Manage SC Business rules & Performance
@@ -975,19 +971,25 @@ def up_info():
 def algorithmen_info():
     st.info("""
     #### Allgemein
-    Naive Bayes best passendster Algorithmus
+    Der Autor empfiehlt Naive Bayes als passendster Algorithmus, jedoch auch die anderen können gute Resultate bringen.
     * Testgrösse bestimmt, wieviel der Daten zum Testen des Modells verwendet werden (bspw. 0.1 = 10 % der Daten dienen als Testdaten, der Rest als Trainingsdaten)
       * Hat direkten Einfluss auf die Genauigkeit des Modells   
       * Empfehlung für Testgrösse zwischen  0.1 - 0.3
-    * Zufallszahl (Randomstate) bestimmt, wie die Trainings-, und Testdaten durchmischt werden. Wird der Randomstate verändert, so werden die Daten neu durchmischt. Bei gleichbleibendem Randomstate, bleibt auch die Durchmischung gleich.
+    * Zufallszahl (Randomstate) bestimmt, wie die Trainings- und Testdaten durchmischt werden. Wird der Randomstate verändert, so werden die Daten neu durchmischt. Bei gleichbleibendem Randomstate, bleibt auch die Durchmischung gleich.
       * Hat keinen direkten Einfluss auf die Genauigkeit des Modells
     
     
     #### Naive Bayes
-    Erklärung
-    Empfehlung für n estimatoren
+    Der Naive Bayes Klassifikationsalgorithmus zählt ebenfalls zu den simpel einzusetzenden Algorithmen und basiert auf dem Bayes-Theorem. Es bestimmt, mit welcher bedingten Wahrscheinlichkeit Y eintrifft, wenn X eingetroffen ist. 
+    #### Random Forest
+    Der Random Forest besteht, wie der Name schon sagt, aus einer grossen Anzahl von einzelnen Entscheidungsbäumen, die als Ganzes funktionieren. Jeder einzelne Baum im Random Forest erzeugt eine Klassenvorhersage und die Klasse mit den meisten Stimmen wird die Vorhersage in dem Modell. 
+    Die Anzahl zu erstellender Entscheidungsbäume kann als Parameter in den Algorithmus eingegeben werden. Eine hoher Wert führt jedoch schnell dazu, dass viel Rechenleistung benötigt wird.
+    Empfehlung für n Zufallsbäume = 10
     
-    
+    #### K-Nearest Neighbour
+    Der KNN Klassifikations Algorithmus ist ein einfach zu implementierender Supervised Learning Algorithmus
+    KNN geht davon aus, dass ähnliche Dinge in unmittelbarer Nähe existieren. Mit anderen Worten: Ähnliche Dinge sind nahe beieinander. KNN funktioniert, indem es die Abstände zwischen einer Eingabe und allen Beispielen  in den Daten ermittelt, die angegebene Anzahl K von Beispielen auswählt, die der Eingabe am nächsten liegen, und dann, im Falle der Klassifizierung, für das häufigste Etikett stimmt.
+    Empfehlung wird K wird unter Empfehlung ausgegeben
     
     """)
 
