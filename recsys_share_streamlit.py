@@ -40,7 +40,7 @@ df = pd.read_csv(file2, engine ='python', error_bad_lines=False, sep='\;')
 df_all = df
 
 #df = df.drop(df.columns[0], axis=1)
-df = df.drop("Funktion", axis=1)
+df = df.drop("Bezeichnung", axis=1)
 df = df.drop("Quelle", axis=1)
 df = df.drop("Anbieter", axis=1)
 df = df.drop("Reifegrad", axis=1)
