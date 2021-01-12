@@ -33,11 +33,15 @@ from sklearn.model_selection import GridSearchCV
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
+@st.cache
+def get_data():
+    url = "https://raw.githubusercontent.com/Bubami/ISCM/main/FinaleExporte.csv"
+    return pd.read_csv(url, sep=';')
 
-
-file2 = ('https://raw.githubusercontent.com/Bubami/ISCM_images/main/FinaleExporte.csv')
-file1 = "C:/Users/micha/Documents/Jupiter/ISCM/Erste Versüche/FinaleExporte.csv"
-df = pd.read_csv(file2, engine ='python', error_bad_lines=True, sep='[;]')
+#file2 = ('https://raw.githubusercontent.com/Bubami/ISCM_images/main/FinaleExporte.csv')
+#file1 = "C:/Users/micha/Documents/Jupiter/ISCM/Erste Versüche/FinaleExporte.csv"
+#df = pd.read_csv(file2, engine ='python', error_bad_lines=False, sep='[;]')
+df = get_data()
 df_all = df
 
 #df = df.drop(df.columns[0], axis=1)
