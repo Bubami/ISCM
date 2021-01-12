@@ -39,7 +39,7 @@ def get_data():
     return pd.read_csv(url, sep=';')
 df_github = get_data()
 
-file1 = "C:/Users/micha/PycharmProjects/Recommender/FinaleExporte.csv"
+file1 = "C:/Users/micha/Documents/Jupiter/ISCM/Erste Versüche/FinaleExporte.csv"
 df_lokal = pd.read_csv(file1, engine ='python', error_bad_lines=False, sep='[;]')
 
 df = df_github
@@ -394,7 +394,7 @@ def page_second():
     st.header("Problemstellung"
               "")
     st.write("Sie können nun Ihre Problemstellung eingeben")
-    st.write("Wählen Sie dafür die passendste Eigenschaft jedes Attributs aus. Um Zusatzinformationen einzublenden, klicken sie auf die Kontrollboxen")
+    st.write("Wählen Sie dafür die passendste Eigenschaft jedes Attributs aus. Um Zusatzinformationen einzublenden, klicken Sie die Kontrollbox an")
 
 
 ################################################################3
