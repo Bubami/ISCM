@@ -39,6 +39,10 @@ def get_data():
     return pd.read_csv(url, sep=';')
 df_github = get_data()
 
+####################
+#Der lokale Datenimport funktioniert nicht, wenn die Datei über Streamlit Share verwendet wird
+#file1 = "C:/Users/micha/PycharmProjects/Recommender/FinaleExporte.csv"
+#df_lokal = pd.read_csv(file1, engine ='python', error_bad_lines=False, sep='[;]')
 
 df = df_github
 df_all = df
