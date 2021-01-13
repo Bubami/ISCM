@@ -1,6 +1,27 @@
+""" ReadMe
+README
+Prototypisches Recommender System basierend auf Machine Learning Algorithmen zur Empfehlung des Einsatzes von Industrie 4.0 Technologien in der Supply Chain
+Verknüpft mit Streamlit um Daten verfügbar zu machen
+Kann sowohl lokal als auch online abgerufen werden (siehe Anleitung zum Emfehlungsdienst)
+Aktivieren des automatischen "Code Foldings" beim Starten der Programmierumgebung, verbessert die Übersicht
+
+Das Dokument ist in 8 Teile gegliedert
+0: Import der benötigten Bibliotheken
+1: Import der Daten (Diese werden Standardmässig aus dem GitHub Repository geladen (z. 49-53), können Optional aber auch lokal geladen werden (z. 56-58)
+2: Main Funktion mit einigen Unterfunktionen und der Seitenauswahl
+3: Einige Funktionen
+4: Streamlit Startseite
+5: Streamlit Deskritiv
+6: Streamlit Präskriptiv
+7: Funktionen mit Beschreibungen und main Funktion zur Seitenauswahl
+"""
+#-0-------------------------------------------------------------------------------
+
 import base64
 
 import csv
+from numpy import random
+
 import ipywidgets as widgets
 import io
 import numpy as np
@@ -23,6 +44,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from mpl_toolkits.mplot3d import Axes3D
+from pandas import DataFrame
 from PIL import Image
 from urllib.request import urlopen
 from io import BytesIO
@@ -32,20 +54,23 @@ from sklearn.model_selection import GridSearchCV
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-
+#-1--------------------------------------------------------------------------------
 @st.cache
 def get_data():
     url = "https://raw.githubusercontent.com/Bubami/ISCM/main/FinaleExporte.csv"
     return pd.read_csv(url, sep=';')
 df_github = get_data()
 
-####################
+
 #Der lokale Datenimport funktioniert nicht, wenn die Datei über Streamlit Share verwendet wird
 #file1 = "C:/Users/micha/PycharmProjects/Recommender/FinaleExporte.csv"
 #df_lokal = pd.read_csv(file1, engine ='python', error_bad_lines=False, sep='[;]')
 
-df = df_github
-df_all = df
+df = df_github          #Zuweisung der Datenquelle
+df_all = df             #Erstellung eines zweiten DataFrames (df) zur späteren Ausgabe der Quelle & Beschreibung
+
+#Die beiden Dataframes df und df_all werden in der Datenaufbereitung gleich behandelt
+#Im df werden alle nicht benötigten Informationen gelöscht
 
 #df = df.drop(df.columns[0], axis=1)
 df = df.drop('Bezeichnung', axis=1)
@@ -57,15 +82,15 @@ df = df.drop('Reifegrad', axis=1)
 df.columns = [x.encode("utf-8").decode("ascii", "ignore") for x in df.columns]
 df_all.columns = [x.encode("utf-8").decode("ascii", "ignore") for x in df_all.columns]
 
-
+# Löschen von leeren Zeilen
 df_all = df_all.dropna(how='all')
 df = df.dropna(how='all')
-# User list comprehension to create a list of lists from Dataframe rows
-# Speichern der .csv Datei in Eine Liste
+
+# Speichern der df in Eine Liste
 list_of_rows = [list(row) for row in df.values]
 list_of_rows_all = [list(row) for row in df_all.values]
-from pandas import DataFrame
 
+# Erstellen von neuen DataFrames mit den angegebenen Überschriften
 df_all = DataFrame(list_of_rows_all,
                    columns=['ID','Beschreibung','Quelle', 'Reifegrad', 'IoT', 'CPS', 'CC', 'ML', 'DLT', 'MBS','Anbieter', 'Technologie', 'Maturity_Index', 'Strategische_Ziele',
                         'Branche', 'Funktion', 'SCOR1', 'Unterprozess'])
@@ -74,16 +99,16 @@ df = DataFrame(list_of_rows,
                columns=['ID','IoT', 'CPS', 'CC', 'ML', 'DLT', 'MBS', 'Technologie', 'Maturity_Index', 'Strategische_Ziele',
                         'Branche', 'Funktion', 'SCOR1', 'Unterprozess'])
 
-
+#-2-------------------------------------------------------------------------------
 def main():
-
+# Erstellen der Streamlit pages
     # Register your pages
     pages = {
         "Startseite": page_third,
         "Deskriptiv": page_first,
         "Präskriptiv": page_second,
     }
-
+# Seitenleiste zur Auswahl
     st.sidebar.title("Auswahl der Funktion")
 
     # Widget to select your page, you can choose between radio buttons or a selectbox
@@ -92,8 +117,8 @@ def main():
 
     # Display the selected page
     pages[page]()
-
-##########################################################################################
+#-3-------------------------------------------------------------------------------
+# Erstellen von Listen für die Eingabe der Problemstellung
 Attribute = 6
 X_test1 = []
 for i in range(Attribute):
@@ -101,9 +126,8 @@ for i in range(Attribute):
 X_test2 = []
 for i in range(Attribute):
     X_test2.append([])
-##########################################################################################
 
-#Eingabe Funktion für die Problemstellung
+# Eingabe Funktion für die Problemstellung
 def eingabe():
         # Maturity Index
         st.write("""
@@ -163,13 +187,13 @@ def eingabe():
             up_info()
 
 #Funktion zum aussortieren doppelter Werte
-def unique_values_plus_ALL(array):
+def unique_values_plus_ALL(array):               #nicht sortiert
     item_layout = widgets.Layout(width='80%')
     ALL = 'ALL'
     unique = array.unique().tolist()
     unique.insert(0, ALL)
     return unique
-def unique_sorted_values_plus_ALL(array):
+def unique_sorted_values_plus_ALL(array):       #sortiert
     item_layout = widgets.Layout(width='80%')
     ALL = 'ALL'
     unique = array.unique().tolist()
@@ -177,10 +201,12 @@ def unique_sorted_values_plus_ALL(array):
     unique.insert(0, ALL)
     return unique
 
+#-4-------------------------------------------------------------------------------
 
-#Startseite
+# Startseite
 def page_third():
     markdown_schmal()
+# Der untenstehende Text wird ausgegeben und die Anleitung kann per Checkbox angezeigt werden
     st.title("Empfehlungsdienst zum Einsatz von 4.0 Technologien in der Suppply Chain")
     st.write("Diese Website soll die deskriptiven und präskriptiven Analysen zum SCM 4.0 Datensatz zugänglich machen. Wenn Sie eine Anleitung wünschen, wählen Sie im untenstehenden Dialo Ja aus. Anschliessend finden Sie einige Informationen zum Projekt im Rahmen der Bachelorarbeit.")
     anleitung_ja = st.radio("Wollen Sie die Anleitung für die Benutzung der Website anzeigen?",("Nein", "Ja"))
@@ -194,15 +220,14 @@ def page_third():
     Will man dann mehr zu den Use Cases dieser Technologie wissen, kann man zurück auf die Seite der deskriptiven Analysen und dort die Beispiele herausfilten, die diese Technologie enthalten. 
     #
     """)
-
+# Imporieren und anzeigen der Logos, sowie eines Platzhalters in der Mitte
     img = Image.open(requests.get("https://raw.githubusercontent.com/Bubami/ISCM/main/ISCMHSG_450px.jpg", stream=True).raw)
     img_fhnw = Image.open(requests.get("https://raw.githubusercontent.com/Bubami/ISCM/main/fhnw_450px.jpg", stream=True).raw)
     img_white = Image.open(requests.get("https://raw.githubusercontent.com/Bubami/ISCM/main/white.png", stream=True).raw)
 
     st.image([np.array(img),np.array(img_white), np.array(img_fhnw)])
 
-
-
+# Weiterer Text zur Applikation
     st.write("""
     #### Informationen zum Projekt & Datenschutz
     Dieses Projekt wurde im Rahmen der Bachelorarbeit von Michael Buchbauer am Institut für Supply Chain Management der Universität St. Gallen (ISCM-HSG) erstellt. Die vorgelegte Arbeit basiert auf internen, vertraulichen Daten und Informationen des ISCM. Das herunterladen und weiterverwenden der verwendeten Daten ist nur mit schriftlicher Erlaubnis des ISCM zulässig.
@@ -211,19 +236,19 @@ def page_third():
     Wir freuen uns über Ihre Rückmeldung auf michael@buchbauer.ch oder stefan.selensky@unisg.ch
 
     """)
+#-5-------------------------------------------------------------------------------
 
 # Deskriptive Analysen
 def page_first():
+# markdown_breit bestimmt die Anzeigebreite der Seite
     markdown_breit()
-
+# Der Datensatz kann per Checkbox angezeigt werden, zusätzlich wird noch eine Tabelle zur Beschreibung des Datensatzes angezeigt und es können Zusatzinformationen eingeblendet werden
     st.title("""
     Deskriptive Analysen vom Datensatz zum Einsatz von 4.0 Technologien in der Supply Chain
     ---
     """)
-
     st.header("Datensatz")
     if st.checkbox("Datensatz anzeigen"):
-
         st.write("""
         ### Der Datensatz wird zuerst statisch abgebildet und beschrieben. Weiter unten können die gewünschten Daten gefiltert werden.
         """)
@@ -235,9 +260,8 @@ def page_first():
 
         st.write(df)
         st.write("")
-        st.write("")
-        st.write("Beschreibung des Datensatzes")
 
+        st.write("Beschreibung des Datensatzes")
 
         if st.checkbox("Zusätzliche Informationen zur Beschreibung anzeigen lassen."):
             st.info("""
@@ -250,29 +274,34 @@ def page_first():
         st.write(df.astype(str).describe(include='all'))
 
 
-
+# Filtern und Visualisieren der Daten per Checkbox
+# Zuerst wird ein Filter angezeigt bei dem zuerst die Kategorie und dann das Attribut gewählt werden kann und anschliessend ein neuer DataFrame erstellt wird
     st.header("Filtern & Visualisieren")
     #if st.checkbox("Tabelle filtern"):
     st.write("""
     #### Technologien
     """)
+
+# Erstellen von DataFrames für die Filterergebnisse
+# Filter 1
     new_df = pd.DataFrame()
     new_df1 = pd.DataFrame()
     new_df2 = pd.DataFrame()
-    auswahl = st.selectbox("Was soll der erste Filter sein?", ("Technologie","IoT", "CPS", "CC", "ML", "DLT", "MBS", "Maturity_Index", "Strategische_Ziele", "Branche", "Funktion", "SCOR1" , "Unterprozess" ))
-    tech = st.multiselect('Attribut auswählen', df[auswahl].unique().tolist())
+    auswahl = st.selectbox("Was soll der erste Filter sein?", ("Technologie","IoT", "CPS", "CC", "ML", "DLT", "MBS", "Maturity_Index", "Strategische_Ziele", "Branche", "Funktion", "SCOR1" , "Unterprozess" )) #Zuerst wird ausgewählt welches Attribut
+    tech = st.multiselect('Attribut auswählen', df[auswahl].unique().tolist())  # Dann kann die Ausprägung gewählt werden
     new_df = df[(df[auswahl].isin(tech))]
     if st.checkbox("Treffer anzeigen"):
-        st.write(new_df)
-    st.write(new_df.astype(str).describe(include='all'))
+        st.write(new_df)    # Gefilterter Datensatz anzeigen
+    st.write(new_df.astype(str).describe(include='all'))    # Descirbe Tabelle des gefilterten Datensatzes ausgeben
 
-
+# Filter 2 und Filter 3 werden auf eine ähnliche Weise aufgebaut wie Filter 1, jedoch wird noch kontrolliert ob die gleiche Kategorie gewählt wurde wie oben
+# Filter 2
     if st.checkbox("Weitere Filter einblenden"):
         st.write("""
         #### Zweiter Filter
         """)
         auswahl1 = st.selectbox("Was soll der zweite Filter sein?", ("Technologie","IoT", "CPS", "CC", "ML", "DLT", "MBS", "Maturity_Index", "Strategische_Ziele", "Branche", "Funktion", "SCOR1" , "Unterprozess" ))
-        if auswahl1 == auswahl:
+        if auswahl1 == auswahl:     # Kontrollieren, ob Filter1 == wie Filter
                 st.write("Sie haben den gleichen Filter wie oben gewählt")
         else:
                 zwei = st.multiselect("Vorhandene Attribute des zweiten Filters", new_df[auswahl1].unique().tolist())
@@ -280,8 +309,7 @@ def page_first():
                 st.write(new_df1)
                 st.write(new_df1.astype(str).describe(include='all'))
 
-
-
+# Filter 3
         auswahl2 = st.selectbox("Was soll der dritte Filter sein?", ("Technologie","IoT", "CPS", "CC", "ML", "DLT", "MBS", "Maturity_Index", "Strategische_Ziele", "Branche", "Funktion", "SCOR1" , "Unterprozess" ))
         if auswahl2 == auswahl1 or auswahl2 == auswahl:
                 st.write("Sie haben den gleichen Filter wie oben gewählt")
@@ -292,40 +320,48 @@ def page_first():
                 st.write(new_df2.astype(str).describe(include='all'))
 
 
-
+# Ausgabe einzelner Beispiele nach ID Nummer mit detailierten Angaben wie Beschreibung oder Quelle
     if st.checkbox("Einzelne Beispiele detailiert anzeigen"):
         bsp = st.multiselect("Geben Sie die ID Nummer des gewünschten Beispiels ein", df["ID"].unique())
         new_df_all = df_all[(df_all["ID"].isin(bsp))]
         if st.checkbox("Anzeigen"):
             st.write(new_df_all)
 
+# Visualisieren der Daten
 
     st.header("Visualisieren der Daten")
+
+# Erstelen von Listen
     selection_list = []
     selection_list.append([])
 
+#-----------------------------------------------
+# Im folgenden Abschnitt bis zum Ende des 5. Sektors wird das Kuchendiagramm erstellt
+# Dabei wird abgefragt, wie viele Filter angewandt wurden und zeigt dann die oben gefilterten Daten an
+# Die Daten auf der Seite Deskriptive Analysen sind also chronologisch miteinander verknüpft, bis und mit dem PPS-Score-Diagramm
+# Die Sortierweise im Kuchendiagramm kann zusätzlich definiert werden
 
 
-
+# Die erste Schlaufe wird erklärt, der Rest ist Simultan dazu
     st.write("""
     #### Kuchendiagramm
     """)
-    if new_df1.empty and new_df2.empty and new_df.empty:
+    if new_df1.empty and new_df2.empty and new_df.empty: # Kontrolle ob ein Filter angewandt wurde oder ob alle df's (new_df1, new_df2 oder new_df) leer sind. Wenn sie leer sind passiert folgende Schleife
         selection = st.selectbox("Wählen Sie das Attribut für das Kuchendiagramm",  ("Technologie","IoT", "CPS", "CC", "ML", "DLT", "MBS", "Maturity_Index", "Strategische_Ziele", "Branche", "Funktion", "SCOR1" , "Unterprozess" ))
-        fig = px.pie(df, names=selection, title='Auteilung der Einträge')
-        st.plotly_chart(fig)
-        if st.checkbox("2tes Kuchendiagramm anzeigen"):
+        fig = px.pie(df, names=selection, title='Auteilung der Einträge') # Figure wird erstellt
+        st.plotly_chart(fig)                            # Figure wird ausgegeben
+        if st.checkbox("2tes Kuchendiagramm anzeigen"): # 2tes Kuchendiagramm per Checkbox erstellen
             selection1 = st.selectbox("Wählen Sie das Attribut für das 2. Kuchendiagramm",  ("Technologie","IoT", "CPS", "CC", "ML", "DLT", "MBS", "Maturity_Index", "Strategische_Ziele", "Branche", "Funktion", "SCOR1" , "Unterprozess" ))
             fig2 = px.pie(df, names=selection1, title='Auteilung der Funktionen')
             st.plotly_chart(fig2)
 
-        if st.checkbox("PPS-Diagramm ausgeben? (Berechnung dauert einen Augenblick)"):
-            plt.rcParams['font.size'] = 18.0
-            plt.rcParams["figure.figsize"] = (30,20)
+        if st.checkbox("PPS-Diagramm ausgeben? (Berechnung dauert einen Augenblick)"):      #Abfrage ob ein PPS-Diagramm ausgegeben werden soll
+            plt.rcParams['font.size'] = 18.0            # Schriftgröss
+            plt.rcParams["figure.figsize"] = (30,20)    # Grösse der Darstellung
             matrix_df = pps.matrix(df).pivot(columns='x',
-                                             index='y', values='ppscore')
-            sns.heatmap(matrix_df, annot=True)
-            st.pyplot()
+                                             index='y', values='ppscore')                   #Zuweisen der Variabeln
+            sns.heatmap(matrix_df, annot=True)          # Berechnen einer Heatmap
+            st.pyplot()                                 # Darstellen der Heatmap
 
     elif new_df1.empty and new_df2.empty:
         selection = st.selectbox("Wählen Sie das Attribut für das Kuchendiagramm",  ("Technologie","IoT", "CPS", "CC", "ML", "DLT", "MBS", "Maturity_Index", "Strategische_Ziele", "Branche", "Funktion", "SCOR1" , "Unterprozess" ))
@@ -374,7 +410,6 @@ def page_first():
             fig2 = px.pie(new_df2, names=selection1, title='Auteilung der Funktionen')
             st.plotly_chart(fig2)
 
-
         if st.checkbox("PPS-Diagramm ausgeben? (Berechnung dauert einen Augenblick)"):
             plt.rcParams['font.size'] = 18.0
             plt.rcParams["figure.figsize"] = (30,20)
@@ -383,15 +418,14 @@ def page_first():
             sns.heatmap(matrix_df, annot=True)
             st.pyplot()
 
-
-
+#-6-------------------------------------------------------------------------------
 
 # Präskriptive Analysen
 def page_second():
     markdown_schmal()
 
 
-    #Einleitung
+# Einleitung
     st.title("Vorhersagen zum Einsatz von 4.0 Technologien in der Supply Chain")
     st.header("Problemstellung"
               "")
@@ -399,14 +433,12 @@ def page_second():
     st.write("Wählen Sie dafür die passendste Eigenschaft jedes Attributs aus. Um Zusatzinformationen einzublenden, klicken Sie die Kontrollbox an")
 
 
-################################################################3
-    #Eingabe der Problemstellung
-
-
+# Eingabe der Problemstellung
     eingabe()
     st.header("""
     Antworten überprüfen
     """)
+# Antworten per Checkbox nochmals einblenden
     if st.checkbox("Antworten einblenden"):
         st.write("Maturity Index = " + X_test1[0])
         st.write("Strategisches Ziel = " + X_test1[1])
@@ -415,7 +447,7 @@ def page_second():
         st.write("SCOR1 = " + X_test1[4])
         st.write("Unterprozess = " + X_test1[5])
 
-    ###############################################################################################
+# Wahl des Algorithmus
     st.header("""
     Algorithmus
     """)
@@ -423,7 +455,7 @@ def page_second():
     st.write("""
     ### Mit welchem Algorithmus soll die Vorhersage gemacht werden?
     """)
-    display = ("KNN", "Naiver Bayes", "Random Forest")
+    display = ("Naiver Bayes", "KNN", "Random Forest")
     options = list(range(len(display)))
     value = st.selectbox("Wählen sie den gewünschten Algorithmus", options, format_func=lambda x: display[x])
 
@@ -433,7 +465,7 @@ def page_second():
 
 
     #Eingabe der n Nachbarn für den KNN Algorithmus
-    if value == 0:
+    if value == 1:
         nachbarn = st.slider("Bestimmen Sie das K für den KNN Algorithmus",1,50,20)
 
     #Eingabe der n Estimatoren für den RandomForest Algorithmus
@@ -443,16 +475,17 @@ def page_second():
 
 
     #Eingabe der Testgrösse
-    testgroesse = st.slider("Wählen Sie die Testgrösse (Massgebend für die Aufteilung der Trainings-, und Testdaten)",0.01,0.9,0.15)
-    #testgroesse = 0.15
+    # testgroesse = st.slider("Wählen Sie die Testgrösse (Massgebend für die Aufteilung der Trainings-, und Testdaten)",0.01,0.9,0.15)
+    testgroesse = 0.0001 # Die Testgroesse wird auf 0.15 eingestellt, das reicht sowohl um den modelscore auszurechnen, nimmt aber keine extreme Datenmenge in Anspruch
+
     #Eingabe der Zufallszahl (Randomstate)
     #zufallszahl = st.slider("Wählen Sie den Randomstate (Massgebend für Durchmischung der Trainings-, und Testdaten)",1,20,1)
-    zufallszahl = 1
+    zufallszahl = random.randint(50)
 
 
 
 
-
+# Technologien aus dem Datensatz df_without_tech entfernen (Dies wird später die X Variabel)
     df_without_tech = df
     df_without_tech = df_without_tech.drop("Technologie", axis=1)
     df_without_tech = df_without_tech.drop("IoT", axis=1)
@@ -462,11 +495,9 @@ def page_second():
     df_without_tech = df_without_tech.drop("DLT", axis=1)
     df_without_tech = df_without_tech.drop("MBS", axis=1)
     df_without_tech = df_without_tech.drop('ID', axis=1)
-    modDf = df_without_tech.append(pd.Series(X_test1, index=df_without_tech.columns), ignore_index=True)
+    modDf = df_without_tech.append(pd.Series(X_test1, index=df_without_tech.columns), ignore_index=True)    # Anhängen der Eingabe an den X-Datensatz
 
-    modDf.astype(str).describe(include='all')
-    # Import LabelEncoder
-    from sklearn import preprocessing
+# X Variabeln werden kodiert
     # creating labelEncoder
     le = preprocessing.LabelEncoder()
     # Converting string labels into numbers.
@@ -476,31 +507,26 @@ def page_second():
     Fkt = le.fit_transform(modDf["Funktion"].values)
     SCR = le.fit_transform(modDf["SCOR1"].values)
     UP = le.fit_transform(modDf["Unterprozess"].values)
-
+# X Variabeln werden in eine Liste geschrieben
     features = list(zip(Mi, SZ, Br, Fkt, SCR, UP))  # ,luftfeuchtigkeit_encoded,wind_encoded))
     X = features
 
-    Tech = le.fit_transform(df["Technologie"].values)
-    IoT = le.fit_transform(df["IoT"].values)
-    CPS = le.fit_transform(df["CPS"].values)
-    CC = le.fit_transform(df["CC"].values)
-    ML = le.fit_transform(df["ML"].values)
-    DLT = le.fit_transform(df["DLT"].values)
-    MBS = le.fit_transform(df["MBS"].values)
 
-    y = Tech
-    y_IoT = IoT
-    y_CPS = CPS
-    y_CC = CC
-    y_ML = ML
-    y_DLT = DLT
-    y_MBS = MBS
+# Auch die Technologien (Y-Variabeln werden kodiert)
+    y = le.fit_transform(df["Technologie"].values)
+    y_IoT = le.fit_transform(df["IoT"].values)
+    y_CPS = le.fit_transform(df["CPS"].values)
+    y_CC = le.fit_transform(df["CC"].values)
+    y_ML = le.fit_transform(df["ML"].values)
+    y_DLT = le.fit_transform(df["DLT"].values)
+    y_MBS = le.fit_transform(df["MBS"].values)
 
-    # Der erstellte und nun kodierte Datensatz wird in eine Variable gespeichert und wieder vom grossen Datensatz gelöscht
+# Der erstellte und nun kodierte Datensatz wird in eine Variable gespeichert und wieder vom grossen Datensatz gelöscht
     laenge = len(X)
     X_test1_kodiert = [X[laenge-1]]
     del X[laenge-1]
 
+# Aufteilen der Trainings- und Testdaten
     testsize = testgroesse
     randomstate = zufallszahl
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=randomstate, test_size=testsize)
@@ -512,34 +538,34 @@ def page_second():
     X_train, X_test, y_MBS_train, y_MBS_test = train_test_split(X, y_MBS, random_state=randomstate, test_size=testsize)
 
     from sklearn.preprocessing import StandardScaler
-
+# Skalieren der X-Variabeln mit dem StandardScaler
     scaler = StandardScaler()
     scaler.fit(X_train)
 
     X_train_transformed = scaler.transform(X_train)
     X_test_transformed = scaler.transform(X_test)
     X_eingegeben = scaler.transform(X_test1_kodiert)
-    ##################################################################################
 
-    ##################################################################################
-    if value == 0:
+# Trainieren der Modelle, dabei wird wieder das Erste erklärt und die restlichen Algorithmen funktioneren gleich
+# Es wird einzeln für die Technologie und jede Schlüsseltechnologie ein Modell trainiert und eine Vorhersage auf diesem Modell generiert
+    if value == 1:
+        # Testfunktion um bestes K auszurechnen (k_value wird später ausgegeben)
         params = {'n_neighbors':[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,31,32,33,34,35,36,37,38,39,40,41,41,43,44,45,46,47,48,49,50,51,52,52,53,54,55,56,57,58,59,60]}
-
         knn = neighbors.KNeighborsRegressor()
-
         model1 = GridSearchCV(knn, params, cv=10)
         model1.fit(X_train_transformed,y_train)
         k_value = model1.best_params_
 
-        model = KNeighborsClassifier(n_neighbors=nachbarn)
-        model.fit(X_train_transformed, y_train)
-        y_pred = model.predict(X_eingegeben)
-        probar = (model.predict_proba(X_eingegeben))
-        probar.sort()
-        modelscore_Technologie = model.score(X_test_transformed, y_test)
-        y = le.fit_transform(df["Technologie"].values)
-        Technologie = le.inverse_transform(y_pred)
-        np.array(Technologie).tolist()
+# Technologie
+# KNN Algorithmus wird als Modell trainiert und soll mit der eingegebenen Problemstellung einen Technologievorschlag machen
+        model = KNeighborsClassifier(n_neighbors=nachbarn)      # Modell definieren
+
+        model.fit(X_train_transformed, y_train)                 # Trainieren des Modells
+        y_pred = model.predict(X_eingegeben)                    # Prediction anhand der eingegebenen Problemstellung
+        modelscore_Technologie = model.score(X_test_transformed, y_test)    # modelscore berechnen
+        y = le.fit_transform(df["Technologie"].values)          # Referenz des Transformierens aufrufen
+        Technologie = le.inverse_transform(y_pred)              # Rücktransformieren
+        np.array(Technologie).tolist()                          # In Liste speichern
 
 
 
@@ -586,11 +612,10 @@ def page_second():
         np.array(MBS).tolist()
     ####################################################################################
     # Naive Bayes Algorithmus
-    if value == 1:
+    if value == 0:
         model = GaussianNB()
-        model.fit(X_train_transformed, y_train)
-        print(model.score(X_test_transformed, y_test))
 
+        model.fit(X_train_transformed, y_train)
         y_pred = model.predict(X_eingegeben)
         modelscore_Technologie = model.score(X_test_transformed, y_test)
         y = le.fit_transform(df["Technologie"].values)
@@ -643,9 +668,8 @@ def page_second():
     # Random Forest Algorithmus
     if value == 2:
         model = RandomForestClassifier(criterion="entropy", n_estimators=n_estimatoren)
-        model.fit(X_train_transformed, y_train)
-        print(model.score(X_test_transformed, y_test))
 
+        model.fit(X_train_transformed, y_train)
         y_pred = model.predict(X_eingegeben)
         modelscore_Technologie = model.score(X_test_transformed, y_test)
         y = le.fit_transform(df["Technologie"].values)
@@ -693,59 +717,56 @@ def page_second():
         y_MBS = le.fit_transform(df["MBS"].values)
         MBS = le.inverse_transform(y_MBS_pred)
         np.array(MBS).tolist()
+# -----------------------------------------------------
 
-    ####################################################################################3
+# Ausgabe der Empfehlung für eine Technologie
     st.header("""
     Empfehlung
     """)
-
-    if value == 0:
+    if value == 1:  #Nur bei KNN wird das idealste K ausgegeben
         st.write("Das empfohlene K für KNN ist:")
         st.write(k_value)
     st.write("""
     ### Die für das eingegebene Problem vorgeschlagene Technologie ist: 
     """)
-    if X_test1[0] != "ALL" or X_test1[1] != "ALL" or X_test1[2] != "ALL" or X_test1[3] != "ALL" or X_test1[
+    if X_test1[0] != "ALL" or X_test1[1] != "ALL" or X_test1[2] != "ALL" or X_test1[3] != "ALL" or X_test1[     # Kontrolle ob eine Problemstellung zumindest teilweise eingegeben wurde
         4] != "ALL" or X_test1[5] != "ALL":
-        st.success(Technologie[0])
-        st.write(probar)
-        st.write("""
-        Bei einer Genauigkeit des Modells von: 
-        """)
-        st.write(modelscore_Technologie)
-    else:
+        st.success(Technologie[0])      # Ausgabe der Technologie in grünem Feld
+
+        if testgroesse > 0.1:   # Genauigkeit des Modells wird nur ausgegeben wenn mindestens 10% der Daten als Testdaten verwendet werden
+            st.write("""
+            Bei einer Genauigkeit des Modells von: 
+            """)
+            st.write(modelscore_Technologie)
+            st.info("Die Modellgenauigkeit ist auf die Testdaten bezogen und hat somit nichts direkt mit der Genauigkeit der Vorhersage zu tun. Ist die Testgroesse < 0.1, wird die Modellgenauigkeit nicht mehr angezeigt.")
+    else:   # Wenn keine Problemstellung eingegeben wurde
         st.error("Geben Sie eine Problemstellung ein")
 
-
+# Ausgabe der empfohlenen Schlüsseltechnologien
     st.write("""
     ### Das Modell errechnet für folgende Basis-Technologien, dass deren Einsatz sinnvoll sein könnte:
     """)
-    if X_test1[0] != "ALL" or X_test1[1] != "ALL" or X_test1[2] != "ALL" or X_test1[3] != "ALL" or X_test1[
+    if X_test1[0] != "ALL" or X_test1[1] != "ALL" or X_test1[2] != "ALL" or X_test1[3] != "ALL" or X_test1[     # Kontrolle ob eine Problemstellung zumindest teilweise eingegeben wurde
         4] != "ALL" or X_test1[5] != "ALL":
-        if IoT == ['WAHR']:
-            if modelscore_IoT > 0.7:
+        if IoT == ['WAHR']:     # Wenn die Prediction = WAHR ist, wird die Schlüsseltechnologie ausgegeben
                 st.write('- IoT')
         if CPS == ['WAHR']:
-            if modelscore_CPS > 0.7:
                 st.write('- Cyber Physical Systems')
         if CC == ['WAHR']:
-            if modelscore_CC > 0.7:
                 st.write('- Cloud Computing')
         if MBS == ['WAHR']:
-            if modelscore_ML > 0.7:
                 st.write('- Machine Learning')
         if DLT == ['WAHR']:
-            if modelscore_DLT > 0.7:
                 st.write('- Distributed Ledger Technology')
         if MBS == ['WAHR']:
-            if modelscore_MBS > 0.7:
                 st.write('- Mobile Based Systems')
 
 
     else:
         st.error("Geben Sie eine Problemstellung ein")
-
-
+#-----------------------------------------------------------
+# Bewertung der Empfehlung
+# Verschiedene Eimgabe Felder zum Eingeben der Bewertung
     st.header("Bewertung")
     beschreibung = st.text_input("Wir bitten Sie das eingegebene Technologieprojekt in 2-3 Sätzen zu beschreiben: ")
     if st.checkbox("Beispiel anzeigen)"):
@@ -761,15 +782,15 @@ def page_second():
             ideale_technologie = st.text_input("Geben Sie ihren Technologievorschlag ein:")
     if st.checkbox("Quelle zum eingegebenen Problem erfassen"):
         quelle = st.text_input("Geben Sie die URL der Quelle ein.")
-
-    Attribute = 22
+# Eine Liste wird erstellt und alle Parameter darauf gespeichert (15 Elemente)
+    Attribute = 15
     l_bewertung = []
     for i in range(Attribute):
         l_bewertung.append([])
     for a in range(0,6):
-        l_bewertung[a] = X_test1[a]
-    #Parameter für Algorithmen (KNN Nachbarn und Random Forest n Estimatoren
-    if value == 0:
+        l_bewertung[a] = X_test1[a]     # Problemstellung
+    # Parameter für Algorithmen (KNN Nachbarn und Random Forest n Estimatoren
+    if value == 1:  # Abhängig davon welcher Algorithmus verwendet wurde werden die Parameter ausgewählt
         l_bewertung[6] = "KNN"
         l_bewertung[7] = nachbarn
     elif value == 2:
@@ -777,25 +798,16 @@ def page_second():
         l_bewertung[6] = "RandomForest"
     else:
         l_bewertung[6] = "Naive Bayes"
-        l_bewertung[7] = "x"
+        l_bewertung[7] = "Naive Bayes"
     l_bewertung[8] = testgroesse
-    l_bewertung[9] = zufallszahl
-    l_bewertung[10] = Technologie[0]
-    l_bewertung[11] = modelscore_Technologie
-    l_bewertung[12] = modelscore_IoT
-    l_bewertung[13] = modelscore_CPS
-    l_bewertung[14] = modelscore_CC
-    l_bewertung[15] = modelscore_ML
-    l_bewertung[16] = modelscore_DLT
-    l_bewertung[17] = modelscore_MBS
-    l_bewertung[18] = bewertung
-    l_bewertung[19] = ideale_technologie
-    l_bewertung[20] = beschreibung
-    l_bewertung[21] = quelle
+    l_bewertung[9] = zufallszahl                     # Randomstate
+    l_bewertung[10] = Technologie[0]                 # Empfohlene Techonlogie
+    l_bewertung[11] = bewertung                     # Bewertung (0-10)
+    l_bewertung[12] = ideale_technologie            # Vorgeschlagene Technologie des Benutzers
+    l_bewertung[13] = beschreibung                  # Beschreibung des Projekts
+    l_bewertung[14] = quelle                        # Quelle zum Technologieprojekt
 
-
-
-    #df_ausgabe =
+# Mit Button wird die Speicherung in eine .csv Datei gestartet, was die Bewertung beendet
     if st.button('Bewertung abschliessen'):
         st.write("""
         Factsheet
@@ -814,9 +826,7 @@ def page_second():
     Wir bitten Sie das Factsheet.csv zur Verbesserung der Vorhersagegenauigkeit an stefan.selensky@unisg.ch zu senden.
     """)
 
-
-
-
+#-7-------------------------------------------------------------------------------
 #Informationsblöcke mit Beschreibung für Streamlit
 def anleitung():
     st.info("""
@@ -1034,7 +1044,6 @@ def markdown_breit():
         unsafe_allow_html=True,
     )
 
-
-
 if __name__ == "__main__":
     main()
+#--------------------------------------------------------------------------------
